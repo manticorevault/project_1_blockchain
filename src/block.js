@@ -73,11 +73,34 @@ class Block {
      *     or Reject with an error.
      */
     getBData() {
-        // Getting the encoded data saved in the Block
-        // Decoding the data to retrieve the JSON representation of the object
-        // Parse the data to an object to be retrieve.
 
-        // Resolve with the data if the object isn't the Genesis block
+        let self = this;
+
+        return new Promise(async (resolve, reject) => {
+            if (self.height === 0) {
+                resolve("Welcome to the Genesis Block");
+
+            }
+
+            // Getting the encoded data saved in the Block
+            let encodedData = this.body; 
+
+            // Decoding the data to retrieve the JSON representation of the object
+            let decodedData = hex2ascii(encodedData);
+
+            // Parse the data to an object to be retrieve.
+            let dataObject = JSON.parse(decodedData);
+
+            // Resolve with the data if the object isn't the Genesis block.
+            if (dataObject) {
+                resolve(dataObject);
+            } else {
+                reject(Error("This block has no actual data in it"))
+            }
+
+
+        });
+    
 
     }
 
