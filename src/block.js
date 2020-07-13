@@ -37,9 +37,9 @@ class Block {
      */
     validate() {
         let self = this;
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             // Save in auxiliary variable the current block hash
-            let tempHash = self.hash     
+            let tempHash = self.hash;
             // Recalculate the hash of the Block
             let tempBlock = {
                 hash: null,
@@ -48,10 +48,7 @@ class Block {
                 time: self.time,
                 previousBlockHash: self.previousBlockHash
             }
-
             let calcHash = SHA256(JSON.stringify(tempBlock)).toString();
-
-
             // Comparing if the hashes changed
             if (tempHash != calcHash) {
                 // Returning the Block is not valid
@@ -73,35 +70,24 @@ class Block {
      *     or Reject with an error.
      */
     getBData() {
-
         let self = this;
-
         return new Promise(async (resolve, reject) => {
-            if (self.height === 0) {
-                resolve("Welcome to the Genesis Block");
-
+            if (self.height == 0) {
+                resolve("This is the Genesis Block");
             }
-
             // Getting the encoded data saved in the Block
-            let encodedData = this.body; 
-
+            let encodedData = this.body;
             // Decoding the data to retrieve the JSON representation of the object
             let decodedData = hex2ascii(encodedData);
-
             // Parse the data to an object to be retrieve.
             let dataObject = JSON.parse(decodedData);
-
-            // Resolve with the data if the object isn't the Genesis block.
+            // Resolve with the data if the object isn't the Genesis block
             if (dataObject) {
                 resolve(dataObject);
             } else {
-                reject(Error("This block has no actual data in it"))
+                reject(Error("The Block has no data."))
             }
-
-
         });
-    
-
     }
 
 }
