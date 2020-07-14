@@ -129,8 +129,8 @@ class Blockchain {
             if (time > currentTime - 300000) {
                 if(bitcoinMessage.verify(message, address, signature)) {
                     let block = new BlockClass.Block({"owner": address, "star": star});
-                    await self._addBlock(block);
-                    resolve(block);
+                    let addedBlock = await self._addBlock(newBlock);
+                    resolve(addedBlock);
                 } else {
                     reject(Error("Block message not verified."))
                 }
