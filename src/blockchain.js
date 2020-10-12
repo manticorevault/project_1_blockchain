@@ -1,4 +1,3 @@
-
 /**
  *                          Blockchain Class
  *  The Blockchain class contain the basics functions to create your own private blockchain
@@ -36,8 +35,8 @@ class Blockchain {
      */
     async initializeChain() {
         // initializing chain
-        if( this.height === -1){
-            let block = new BlockClass.Block({data: 'Genesis Block'});
+        if (this.height === -1) {
+            let block = new BlockClass.Block({ data: 'Genesis Block' });
             await this._addBlock(block);
         }
     }
@@ -69,7 +68,7 @@ class Blockchain {
             // Give new block a height
             block.height = self.height + 1;
             // Timestamp the new block
-            block.time = new Date().getTime().toString().slice(0,-3);
+            block.time = new Date().getTime().toString().slice(0, -3);
             // If there is a previous block, get the previous blocks hash
             if (self.chain.length > 0) {
                 block.previousBlockHash = self.chain[self.height].hash;
@@ -80,7 +79,7 @@ class Blockchain {
             self.chain.push(block);
             // Update the Height of the Chain
             self.height += 1;
-            
+
             if (self.chain[self.height] == block) {
                 resolve(block);
             } else {
@@ -99,7 +98,7 @@ class Blockchain {
      */
     requestMessageOwnershipVerification(address) {
         return new Promise((resolve) => {
-            resolve(address + ':' + new Date().getTime().toString().slice(0,-3) + ':starRegistry');
+            resolve(address + ':' + new Date().getTime().toString().slice(0, -3) + ':starRegistry');
         });
     }
 
@@ -124,13 +123,13 @@ class Blockchain {
         let self = this;
         return new Promise(async (resolve, reject) => {
             let time = parseInt(message.split(':')[1]);
-            let currentTime = parseInt(new Date().getTime().toString().slice(0,-3));
+            let currentTime = parseInt(new Date().getTime().toString().slice(0, -3));
 
             if (time > currentTime - 300000) {
-                if(bitcoinMessage.verify(message, address, signature)) {
-                    let block = new BlockClass.Block({"owner": address, "star": star});
-                    let addedBlock = await self._addBlock(newBlock);
-                    resolve(addedBlock);
+                if (bitcoinMessage.verify(message, address, signature)) {
+                    let block = new BlockClass.Block({ "owner": address, "star": star });
+                    await self._addBlock(block);
+                    resolve(block);
                 } else {
                     reject(Error("Block message not verified."))
                 }
@@ -151,9 +150,9 @@ class Blockchain {
         return new Promise((resolve, reject) => {
             let block = self.chain.filter(p => p.hash === hash)[0];
             if (block) {
-               resolve(block);
+                resolve(block);
             } else {
-               resolve(null);
+                resolve(null);
             }
         });
     }
@@ -167,7 +166,7 @@ class Blockchain {
         let self = this;
         return new Promise((resolve, reject) => {
             let block = self.chain.filter(p => p.height === height)[0];
-            if(block){
+            if (block) {
                 resolve(block);
             } else {
                 resolve(null);
@@ -185,7 +184,7 @@ class Blockchain {
         let self = this;
         let stars = [];
         return new Promise((resolve, reject) => {
-            self.chain.forEach(function(block) {
+            self.chain.forEach(function (block) {
                 block.getBData().then(data => {
                     if (data.owner) {
                         stars.push(data);
@@ -210,9 +209,9 @@ class Blockchain {
                 for (var i = 1; i <= self.height; i++) {
                     let block = self.chain[i];
                     let validation = await block.validate();
-                    if (!validation){
+                    if (!validation) {
                         console.log("ERROR VALIDATING DATA");
-                    } else if (block.previousBlockHash != self.chain[i-1].hash) {
+                    } else if (block.previousBlockHash != self.chain[i - 1].hash) {
                         console.log("ERROR WITH PREVIOUS BLOCK HASH");
                     }
                 }
