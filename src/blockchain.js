@@ -183,13 +183,14 @@ class Blockchain {
     getStarsByWalletAddress(address) {
         let self = this;
         let stars = [];
-        return new Promise((resolve, reject) => {
-            self.chain.forEach(function (block) {
-                block.getBData().then(data => {
-                    if (data.owner) {
-                        stars.push(data);
+        return new Promise((resolve, _) => {
+            self.chain.forEach(block => {
+                const chainData = block.getBData();
+                if (chainData) {
+                    if (chainData.owner === address) {
+                        stars.push(chainData)
                     }
-                });
+                }
             });
             resolve(stars);
         });
@@ -205,30 +206,29 @@ class Blockchain {
         let self = this;
         let errorLog = [];
         return new Promise(async (resolve, reject) => {
-            if (self.height > 0) {
-                for (var i = 1; i <= self.height; i++) {
-                    let block = self.chain[i];
-                    let validation = await block.validate();
-                    if (!validation) {
-                        console.log("ERROR VALIDATING DATA");
-                    } else if (block.previousBlockHash != self.chain[i - 1].hash) {
-                        console.log("ERROR WITH PREVIOUS BLOCK HASH");
+            let promises = [];
+            let chainIndex = 0;
+            self.chain.forEach(block => {
+                promises.push(block.validate());
+                if (block.height > 0) {
+                    let previousBlockHash = block.previousBlockHash;
+                    let blockHash = self.chain[chainIndex - 1].hash;
+                    if (blockHash != previousBlockHash) {
+                        errorLog.push(`Error - Block Heigh: ${block.height} - Previous Hash don't match.`);
                     }
                 }
-                if (errorLog) {
-                    resolve(errorLog);
-                } else {
-                    resolve("Chain is valid.");
-                }
-            } else {
-                reject(Error("Cannot validate chain.")).catch(error => {
-                    console.log('caught', error.message);
+                chainIndex++;
+            });
+            Promise.all(promises).then((results) => {
+                chainIndex = 0;
+                results.forEach(valid => {
+                    if (!valid) {
+                        errorLog.push(`Error - Block Heigh: ${self.chain[chainIndex].height} - Has been Tampered.`);
+                    }
+                    chainIndex++;
                 });
-            }
-        }).then(successfulValidation => {
-            console.log(successfulValidation);
-        }).catch(unsuccessfulValidation => {
-            console.log(unsuccessfulValidation);
+                resolve(errorLog);
+            }).catch((err) => { console.log(err); reject(err) });
         });
     }
 }
