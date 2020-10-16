@@ -37,26 +37,17 @@ class Block {
      */
     validate() {
         let self = this;
-        return new Promise(async (resolve, reject) => {
+        return new Promise((resolve, reject) => {
             // Save in auxiliary variable the current block hash
-            let tempHash = self.hash;
+            const tempHash = self.hash;
+            self.hash = "";
             // Recalculate the hash of the Block
-            let tempBlock = {
-                hash: null,
-                height: self.height,
-                body: self.body,
-                time: self.time,
-                previousBlockHash: self.previousBlockHash
-            }
-            let calcHash = SHA256(JSON.stringify(tempBlock)).toString();
+            const encryptedHash = SHA256(JSON.stringify(tempHash)).toString()
+            self.hash = encryptedHash;
             // Comparing if the hashes changed
-            if (tempHash != calcHash) {
-                // Returning the Block is not valid
-                resolve(false);
-            } else {
-                // Returning the Block is valid
-                resolve(true);
-            }
+            // Returning the Block is not valid
+            // Returning the Block is valid
+            resolve(tempHash === encryptedHash);
         });
     }
 
@@ -70,24 +61,15 @@ class Block {
      *     or Reject with an error.
      */
     getBData() {
-        let self = this;
-        return new Promise(async (resolve, reject) => {
-            if (self.height == 0) {
-                resolve("This is the Genesis Block");
-            }
-            // Getting the encoded data saved in the Block
-            let encodedData = this.body;
-            // Decoding the data to retrieve the JSON representation of the object
-            let decodedData = hex2ascii(encodedData);
-            // Parse the data to an object to be retrieve.
-            let dataObject = JSON.parse(decodedData);
-            // Resolve with the data if the object isn't the Genesis block
-            if (dataObject) {
-                resolve(dataObject);
-            } else {
-                reject(Error("The Block has no data."))
-            }
-        });
+        // Getting the encoded data saved in the Block
+        // Decoding the data to retrieve the JSON representation of the object
+        const decodedData = hex2ascii(this.body);
+        // Parse the data to an object to be retrieve.
+        const dataObj = JSON.parse(decodedData);
+        // Resolve with the data if the object isn't the Genesis block
+        if (dataObj && this.height > 0) {
+            return dataObj;
+        }
     }
 
 }
