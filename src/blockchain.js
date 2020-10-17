@@ -180,8 +180,8 @@ class Blockchain {
         let self = this;
         let stars = [];
         return new Promise((resolve, _) => {
-            self.chain.forEach(block => {
-                const chainData = block.getBData();
+            self.chain.forEach(async block => {
+                const chainData = await block.getBData();
                 if (chainData) {
                     if (chainData.owner === address) {
                         stars.push(chainData)
@@ -204,8 +204,8 @@ class Blockchain {
         return new Promise(async (resolve, reject) => {
             let promises = [];
             let chainIndex = 0;
-            self.chain.forEach(block => {
-                promises.push(block.validate());
+            self.chain.forEach(async block => {
+                promises.push(await block.validate());
                 if (block.height > 0) {
                     let previousBlockHash = block.previousBlockHash;
                     let blockHash = self.chain[chainIndex - 1].hash;
