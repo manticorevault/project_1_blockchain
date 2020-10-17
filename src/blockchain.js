@@ -200,34 +200,41 @@ class Blockchain {
      */
     validateChain() {
         let self = this;
-        let errorLog = [];
+        let errorLog = []
+
         return new Promise(async (resolve, reject) => {
-            let promises = [];
-            let chainIndex = 0;
-            self.chain.forEach(async block => {
-                promises.push(await block.validate());
-                if (block.height > 0) {
-                    let previousBlockHash = block.previousBlockHash;
-                    let blockHash = self.chain[chainIndex - 1].hash;
-                    if (blockHash != previousBlockHash) {
-                        errorLog.push(`Error - Block Heigh: ${block.height} - Previous Hash don't match.`);
+            if (self.height > 0) {
+                for (let counter = 1; counter <= self.height; counter++) {
+                    let block = self.chain[counter]
+                    let validate = await block.validate();
+
+
+                    if (!validate) {
+                        console.log("There was an error while trying to validate your chain's data.")
+
+                    } else if (block.previousBlockHash != self.chain[counter - 1].hash) {
+                        console.log("The previous block might've been tempered.")
                     }
                 }
-                chainIndex++;
-            });
-            Promise.all(promises).then((results) => {
-                chainIndex = 0;
-                results.forEach(valid => {
-                    if (!valid) {
-                        errorLog.push(`Error - Block Heigh: ${self.chain[chainIndex].height} - Has been Tampered.`);
-                    }
-                    chainIndex++;
-                });
-                resolve(errorLog);
-            }).catch((err) => { console.log(err); reject(err) });
-        });
-    }
 
+                if (errorLog) {
+                    resolve(errorLog)
+                } else {
+                    resolve("This chain was successfully validate")
+                }
+            } else {
+                reject(Error("This chain couldn't be validated.")).catch(error => {
+                    console.log(error.message);
+                });
+            }
+        })
+            .then(completedValidation => {
+                console.log(completedValidation)
+            })
+            .catch(brokenValidation => {
+                console.log(brokenValidation);
+            })
+    }
 }
 
 module.exports.Blockchain = Blockchain;   
